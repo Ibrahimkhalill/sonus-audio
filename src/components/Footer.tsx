@@ -34,7 +34,18 @@ export default function Footer() {
 
         <div className="mt-14 flex flex-col justify-between gap-3 border-t border-line pt-8 text-xs text-muted sm:flex-row">
           <p>&copy; {new Date().getFullYear()} SONUS Audio. All rights reserved.</p>
-          <p>Photography via Unsplash · 3D model &copy; Khronos Group (CC-BY 4.0)</p>
+          <p>
+            Designed &amp; built by{' '}
+            <a
+              href="https://github.com/Ibrahimkhalill"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-ink underline decoration-coral underline-offset-4 transition-colors hover:text-coral"
+            >
+              Ibrahim Khalil
+            </a>{' '}
+            &middot; Photography via Unsplash
+          </p>
         </div>
       </div>
     </footer>
