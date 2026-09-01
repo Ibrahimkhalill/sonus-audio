@@ -170,17 +170,68 @@ export default function Scene3D({ progressRef, onReady, onFail }: Scene3DProps) 
     let frameId = 0;
     let running = false;
 
+    // Drag-to-rotate. Auto-spin resumes once the user lets go and the
+    // momentum has bled off.
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let velX = 0;
+    let velY = 0;
+    let userPitch = 0;
+
+    const canvas = renderer.domElement;
+    canvas.style.touchAction = 'none';
+    canvas.style.cursor = 'grab';
+
+    const onDown = (e: PointerEvent) => {
+      dragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      velX = 0;
+      velY = 0;
+      canvas.style.cursor = 'grabbing';
+      canvas.setPointerCapture?.(e.pointerId);
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      velX = (e.clientX - lastX) * 0.006;
+      velY = (e.clientY - lastY) * 0.006;
+      userPitch += velY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    };
+    const onUp = () => {
+      dragging = false;
+      canvas.style.cursor = 'grab';
+    };
+
+    canvas.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    canvas.addEventListener('pointercancel', onUp);
+
     const tick = () => {
       const rect = progressRef.current?.getBoundingClientRect();
       const progress = rect
         ? 1 - (rect.top + rect.height) / (window.innerHeight + rect.height)
         : 0;
 
-      model.rotation.y += 0.005;
+      if (!dragging) {
+        // Coast, then hand back to the idle spin.
+        userPitch += velY;
+        velX *= 0.93;
+        velY *= 0.93;
+        model.rotation.y += 0.005;
+      }
+
+      // Keep the pitch within a range that never shows the model edge-on.
+      userPitch = THREE.MathUtils.clamp(userPitch, -0.6, 0.6);
+
+      model.rotation.y += velX;
       model.rotation.x = THREE.MathUtils.lerp(
         model.rotation.x,
-        progress * 0.5 - 0.18,
-        0.05
+        progress * 0.5 - 0.18 + userPitch,
+        0.08
       );
       model.position.y = 0.15 + Math.sin(performance.now() / 1400) * 0.06;
 
@@ -212,6 +263,10 @@ export default function Scene3D({ progressRef, onReady, onFail }: Scene3DProps) 
       stop();
       visIo.disconnect();
       window.removeEventListener('resize', resize);
+      canvas.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      canvas.removeEventListener('pointercancel', onUp);
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
           obj.geometry?.dispose();

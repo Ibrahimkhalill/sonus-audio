@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import TiltCard from './TiltCard';
 import { PRODUCTS } from '../data/site';
 import { useReveal } from '../lib/useReveal';
 
@@ -26,24 +27,31 @@ export default function Products() {
             className="a-fade-up group"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="relative overflow-hidden rounded-2xl border border-line bg-cream">
-              <img
-                src={p.image}
-                alt={p.name}
-                loading="lazy"
-                className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-              />
-              <span className="absolute left-3 top-3 rounded-full bg-cream/90 px-3 py-1 text-[11px] font-medium text-ink backdrop-blur">
-                {p.tag}
-              </span>
-              <button
-                type="button"
-                aria-label={`Add ${p.name} to cart`}
-                className="absolute bottom-3 right-3 flex h-11 w-11 translate-y-2 items-center justify-center rounded-full bg-ink text-on-coral opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-              >
-                <Plus className="h-5 w-5" strokeWidth={2.2} />
-              </button>
-            </div>
+            <TiltCard>
+              <div className="relative overflow-hidden rounded-2xl border border-line bg-cream shadow-card">
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  loading="lazy"
+                  className="aspect-[4/5] w-full object-cover"
+                />
+                {/* Lifted off the card face so it reads as a separate plane. */}
+                <span
+                  className="absolute left-3 top-3 rounded-full bg-cream/90 px-3 py-1 text-[11px] font-medium text-ink backdrop-blur"
+                  style={{ transform: 'translateZ(40px)' }}
+                >
+                  {p.tag}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Add ${p.name} to cart`}
+                  className="absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-ink text-on-coral opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{ transform: 'translateZ(56px)' }}
+                >
+                  <Plus className="h-5 w-5" strokeWidth={2.2} />
+                </button>
+              </div>
+            </TiltCard>
 
             <div className="mt-4 flex items-baseline justify-between gap-3">
               <h3 className="font-display text-lg font-bold text-ink">{p.name}</h3>
